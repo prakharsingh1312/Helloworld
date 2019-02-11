@@ -1,7 +1,7 @@
 <?php
-$host = 'fdb22.awardspace.net';
-$username = '2843721_cryptex';
-$password = 'popatpanda13';
-$database = '2843721_cryptex';
+$host = 'localhost';
+$username = 'root';
+$password = '';
+$database = 'test';
 $dbconfig = mysqli_connect($host,$username,$password,$database);
 ?>
