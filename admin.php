@@ -34,7 +34,7 @@ header("location:dashboard.php");
     else 
         {
 		$hash = md5( rand(0,1000) );
-                    $update=$dbconfig->prepare($dbconfig,"INSERT INTO admin_login (email,hash,password,name,mobile,enrollment_number) VALUES (?,?,?,?,?,?)");
+                    $update=$dbconfig->prepare("INSERT INTO admin_login (email,hash,password,name,mobile,enrollment_number) VALUES (?,?,?,?,?,?)");
 					$update->bind_param("ssssss",$email,$hash,$password,$name,$mobile,$enrollment_number);
 		$to      = $email; // Send email to our user
 $subject = 'Signup | Verification'; // Give the email a subject 
