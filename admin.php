@@ -25,7 +25,7 @@ header("location:dashboard.php");
     $sql_query->bind_param("s",$email);
 			$sql_query->execute();
 			$sql_query=$sql_query->get_result();
-    $row=$sql_query->fetch_assoc;
+    $row=$sql_query->fetch_assoc();
     
     if($sql_query->num_rows===1)
         {
@@ -66,11 +66,11 @@ $sql_query=$dbconfig->prepare("SELECT  userid,email,name,activated,approved FROM
 		$sql_query->bind_param("ss",$email,$password);
 		$sql_query->execute();
 		$sql_query=$sql_query->get_result();
-$row=$sql_query->fetch_assoc;
 // If result matched $username and $password, table row must be 1 row
 
 if($sql_query->num_rows==1)
 {
+	$row=$sql_query->fetch_assoc();
 	if($row['activated']==0)
 	alert("Account Not Activated. Please activate your account through the activation link sent on your email.");
 	elseif($row['approved']==0)
