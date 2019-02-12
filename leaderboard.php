@@ -15,7 +15,7 @@ function check_pass($i,$dbconfig,$password){
 if(!isset($_SESSION['email'])||$_SESSION['admin']!=1)
 header("location:admin.php");
 
-$query1=mysqli_query($dbconfig,"SELECT total,name,enrollment_number,email,mobile,dq from user_login,admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where user_login.userid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid and dq!=1 order by total,tie ");
+$query1=mysqli_query($dbconfig,"SELECT total,name,enrollment_number,email,mobile,dq from user_login,admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where user_login.userid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid and dq!=1 order by total DESC,tie DESC");
 $count1=mysqli_num_rows($query1);
 ?>
 <html>

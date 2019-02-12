@@ -3,5 +3,9 @@ $host = 'localhost';
 $username = 'root';
 $password = '';
 $database = 'test';
-$dbconfig = mysqli_connect($host,$username,$password,$database);
+$dbconfig = new mysqli($host,$username,$password,$database);
+if($dbconfig->connect_error)
+{
+	echo "Connection Failed : ".$dbconfig->connect_error;
+}
 ?>

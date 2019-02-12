@@ -6,9 +6,10 @@ function alert($msg) {
 }
 function check_pass($i,$dbconfig,$password){
 	$password=crypt($password, '$2a$07$CCSCodersUnderSiegelul$');
-	$query=mysqli_query($dbconfig,"SELECT * from {$i}_login where email='{$_SESSION['email']}' and password='$password'");
-	$count=mysqli_num_rows($query);
-	return $count;
+	$query=$dbconfig->prepare($dbconfig,"SELECT * from {$i}_login where email=? and password=?");
+	$query->bind_param("ss",$_SESSION['email'],$password);
+	$query->execute;
+	return $query->affected_rows;
 }
 
 

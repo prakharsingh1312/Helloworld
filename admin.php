@@ -21,18 +21,21 @@ header("location:dashboard.php");
 	$name=mysqli_real_escape_string($dbconfig,$_POST['name']);
 		$enrollment_number=mysqli_real_escape_string($dbconfig,$_POST['enumber']);
 		$mobile=mysqli_real_escape_string($dbconfig,$_POST['number']);
-    $sql_query="SELECT userid FROM admin_login WHERE email='$email'";
-    $result=mysqli_query($dbconfig,$sql_query);
-    $row=mysqli_fetch_array($result,MYSQLI_ASSOC);
-    $count=mysqli_num_rows($result);
-    if($count==1)
+    $sql_query=$dbconfig->prepare("SELECT userid FROM admin_login WHERE email=?");
+    $sql_query->bind_param("s",$email);
+			$sql_query->execute();
+			$sql_query=$sql_query->get_result();
+    $row=$sql_query->fetch_assoc;
+    
+    if($sql_query->num_rows===1)
         {
             alert("Email already in use. PLease Log-in to continue.");
         }
     else 
         {
 		$hash = md5( rand(0,1000) );
-                    $update=mysqli_query($dbconfig,"INSERT INTO admin_login (email,hash,password,name,mobile,enrollment_number) VALUES ('$email','$hash','$password','$name','$mobile','$enrollment_number')");
+                    $update=$dbconfig->prepare($dbconfig,"INSERT INTO admin_login (email,hash,password,name,mobile,enrollment_number) VALUES (?,?,?,?,?,?)");
+					$update->bind_param("ssssss",$email,$hash,$password,$name,$mobile,$enrollment_number);
 		$to      = $email; // Send email to our user
 $subject = 'Signup | Verification'; // Give the email a subject 
 $message = '
@@ -59,13 +62,14 @@ mail($to, $subject, $message, $headers); // Send our email
 		$email=mysqli_real_escape_string($dbconfig,$_POST['email']);
 $password=mysqli_real_escape_string($dbconfig,$_POST['password']);
 	$password=crypt($password, '$2a$07$CCSCodersUnderSiegelul$');
-$sql_query="SELECT  userid,email,name,activated,approved FROM admin_login WHERE email='$email' and password='$password'";
-$result=mysqli_query($dbconfig,$sql_query);
-$row=mysqli_fetch_array($result,MYSQLI_ASSOC);
-$count=mysqli_num_rows($result);
+$sql_query=$dbconfig->prepare("SELECT  userid,email,name,activated,approved FROM admin_login WHERE email=? and password=?");
+		$sql_query->bind_param("ss",$email,$password);
+		$sql_query->execute();
+		$sql_query=$sql_query->get_result();
+$row=$sql_query->fetch_assoc;
 // If result matched $username and $password, table row must be 1 row
 
-if($count==1)
+if($sql_query->num_rows==1)
 {
 	if($row['activated']==0)
 	alert("Account Not Activated. Please activate your account through the activation link sent on your email.");
