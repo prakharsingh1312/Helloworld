@@ -6,10 +6,11 @@ function alert($msg) {
 }
 function check_pass($i,$dbconfig,$password){
 	$password=crypt($password, '$2a$07$CCSCodersUnderSiegelul$');
-	$query=$dbconfig->prepare($dbconfig,"SELECT * from {$i}_login where email=? and password=?");
+	$query=$dbconfig->prepare("SELECT * from {$i}_login where email=? and password=?");
 	$query->bind_param("ss",$_SESSION['email'],$password);
-	$query->execute;
-	return $query->affected_rows;
+	$query->execute();
+	$query=$query->get_result();
+	return $query->num_rows;
 }
 
 
@@ -34,7 +35,9 @@ else
 				if($j==1)
 				{
 				$name=mysqli_real_escape_string($dbconfig,$_POST['name']);
-			$query=mysqli_query($dbconfig,"UPDATE {$i}_login SET name='$name' where email='{$_SESSION['email']}'");
+			$query=$dbconfig->prepare("UPDATE {$i}_login SET name=? where email=?");
+					$query->bind_param("ss",$name,$_SESSION['email']);
+					$query->execute();
 				alert("Name Updated Successfully.");
 			}
 				else
@@ -47,7 +50,9 @@ else
 				if($j==1)
 				{
 					$enrollment_number=mysqli_real_escape_string($dbconfig,$_POST['enumber']);
-					$query=mysqli_query($dbconfig,"UPDATE {$i}_login SET enrollment_number=$enrollment_number where email='{$_SESSION['email']}'");
+					$query=$dbconfig->prepare("UPDATE {$i}_login SET enrollment_number=? where email=?");
+					$query->bind_param("ss",$enrollment_number,$_SESSION['email']);
+					$query->execute();
 					alert("Enrollment Number Updated Successfully.");
 				}
 					else
@@ -59,7 +64,9 @@ else
 				if($j==1)
 				{
 					$number=mysqli_real_escape_string($dbconfig,$_POST['number']);
-					$query=mysqli_query($dbconfig,"UPDATE {$i}_login SET mobile=$number where email='{$_SESSION['email']}'");
+					$query=$dbconfig->prepare("UPDATE {$i}_login SET mobile=? where email=?");
+					$query->bind_param("ss",$number,$_SESSION['email']);
+					$query->execute();
 					alert("Mobile Number Updated Successfully.");
 				}
 					else
@@ -72,7 +79,9 @@ else
 				{
 					$npassword=mysqli_real_escape_string($dbconfig,$_POST['npassword']);
 					$npassword=crypt($npassword, '$2a$07$CCSCodersUnderSiegelul$');
-					$query=mysqli_query($dbconfig,"UPDATE {$i}_login SET password='$npassword' where email='{$_SESSION['email']}'");
+					$query=$dbconfig->prepare("UPDATE {$i}_login SET password=? where email=?");
+					$query->bind_param("ss",$password,$_SESSION['email']);
+					$query->execute();
 					alert("Password Updated Successfully.");
 				}
 					else
@@ -85,10 +94,17 @@ else
 	}
 	{
 	if($_SESSION['user']==1)
-	$query=mysqli_query($dbconfig,"SELECT name,enrollment_number,mobile,email FROM user_login WHERE email='{$_SESSION['email']}'");
+	{
+	$query=$dbconfig->prepare("SELECT name,enrollment_number,mobile,email FROM user_login WHERE email=?");
+	}
 	else
-		$query=mysqli_query($dbconfig,"SELECT name,enrollment_number,mobile,email FROM admin_login WHERE email='{$_SESSION['email']}'");
-	$row=mysqli_fetch_array($query,MYSQLI_ASSOC);
+	{
+		$query=$dbconfig->prepare("SELECT name,enrollment_number,mobile,email FROM admin_login WHERE email=?");
+	}
+	$query->bind_param("s",$_SESSION['email']);
+		$query->execute();
+		$query=$query->get_result();
+		$row=$query->fetch_assoc();
 	}
 }
 ?>

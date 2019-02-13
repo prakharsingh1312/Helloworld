@@ -6,9 +6,11 @@ function alert($msg) {
 }
 function check_pass($i,$dbconfig,$password){
 	$password=crypt($password, '$2a$07$CCSCodersUnderSiegelul$');
-	$query=mysqli_query($dbconfig,"SELECT * from {$i}_login where email='{$_SESSION['email']}' and password='$password'");
-	$count=mysqli_num_rows($query);
-	return $count;
+	$query=$dbconfig->prepare("SELECT * from {$i}_login where email=? and password=?");
+	$query->bind_param("ss",$_SESSION['email'],$password);
+	$query->execute();
+	$query=$query->get_result();
+	return $query->num_rows;
 }
 
 
@@ -32,9 +34,17 @@ elseif($_SERVER['REQUEST_METHOD']=="POST")
 		$tie=0;
 	$points=mysqli_real_escape_string($dbconfig,$_POST['points']);
 	if($type==0)
-	$query=mysqli_query($dbconfig,"INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre (question,choice1,choice2,choice3,answer,tie,points,text) VALUES('$question','$op1','$op2','$op3','$answer',$tie,$points,$type)");
+	{
+	$query=$dbconfig->prepare("INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre (question,choice1,choice2,choice3,answer,tie,points,text) VALUES(?,?,?,?,?,?,?,?)");
+		$query->bind_param("ssssssss",$question,$op1,$op2,$op3,$answer,$tie,$points,$text);
+		$query->execute();
+	}
 	else
-		$query=mysqli_query($dbconfig,"INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre (question,answer,tie,points,text) VALUES('$question','$answer',$tie,$points,$type)");
+	{
+		$query=$dbconfig->prepare("INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre (question,answer,tie,points,text) VALUES(?,?,?,?,?)");
+		$query->bind_param("sssss",$question,$answer,$tie,$points,$text);
+		$query->execute();
+	}
 	alert("Question Added Successfully.");
 }?>
 <html>
