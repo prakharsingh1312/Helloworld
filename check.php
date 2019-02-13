@@ -18,9 +18,15 @@ for($i=1;$i<=$_SESSION['numq'];$i++)
 }
 for($i=1;$i<=$_SESSION['numq'];$i++)
 {
-$query=mysqli_query($dbconfig,"INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_response (userid,qid,response) VALUES ({$_SESSION['uid']},{$_SESSION['qid'][$i]},'{$ans[$i]}')");
+$query=$dbconfig->prepare("INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_response (userid,qid,response) VALUES (?,?,?)");
+	$query->bind_param("iis",$_SESSION['uid'],$_SESSION['qid'][$i],$ans[$i]);
+	$query->execute();
+	$query->close();
 
 }
-$query=mysqli_query($dbconfig,"UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET total=$points, tie=$tie,normal=$normal WHERE userid={$_SESSION['uid']}");
+$query=$dbconfig->prepare("UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET total=?, tie=?,normal=? WHERE userid=?");
+$query->bind_param("iiii",$points,$tie,$normal,$_SESSION['uid']);
+	$query->execute();
+	$query->close();
 header("location:test_submitted.php");
 ?>

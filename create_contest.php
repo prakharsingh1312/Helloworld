@@ -29,20 +29,27 @@ elseif($_SERVER['REQUEST_METHOD']=="POST")
 		$etime=date("Y:m:d h:i:s",$etime);
 		$ic=mysqli_real_escape_string($dbconfig,$_POST['ic']);
 		$id=$_SESSION['uid'];
-		$cid=mysqli_query($dbconfig,"SELECT `AUTO_INCREMENT`
+		$cid=$dbconfig->prepare("SELECT `AUTO_INCREMENT`
 FROM  INFORMATION_SCHEMA.TABLES
 WHERE TABLE_SCHEMA = 'test'
 AND   TABLE_NAME   = 'all_contests';");
-		$cid=mysqli_fetch_array($cid,MYSQLI_ASSOC);
+		$cid->execute();
+		$cid=$cid->get_result();
+		$cid=$cid->fetch_assoc();
 		$cid=$cid['AUTO_INCREMENT'];
-		$result="INSERT INTO all_contests (ic,contestid,name,start_time,end_time,org_name,userid,des) VALUES ('$ic',$cid,'$cname','$stime','$etime','$oname',$id,'$des')";
-		$query=mysqli_query($dbconfig,$result);
-		$result1="CREATE TABLE admin_{$id}_{$cid}_pre (qid int(10) NOT NULL AUTO_INCREMENT,question varchar(10000),choice1 varchar(1000),choice2 varchar(1000),choice3 varchar(1000),answer varchar(1000),tie int(1),text int(1),points int(10), PRIMARY KEY (`qid`))";
-		$query=mysqli_query($dbconfig,$result1);
-		$result1="CREATE TABLE admin_{$id}_{$cid}_res (userid int(10) NOT NULL,total int(10),normal int(10),tie int(10),dq int(1) NOT NULL DEFAULT '0', PRIMARY KEY (`userid`))";
-		$query=mysqli_query($dbconfig,$result1);
-		$result1="CREATE TABLE admin_{$id}_{$cid}_response (userid int(10),qid int(10),response varchar(1000))";
-		$query=mysqli_query($dbconfig,$result1);
+		$result=$dbconfig->prepare("INSERT INTO all_contests (ic,contestid,name,start_time,end_time,org_name,userid,des) VALUES (?,?,?,?,?,?,?,?)");
+		$result->bind_param("sissssis",$ic,$cid,$cname,$stime,$etime,$oname,$id,$des);
+		$result->execute();
+		$result->close();
+		$result1=$dbconfig->prepare("CREATE TABLE admin_{$id}_{$cid}_pre (qid int(10) NOT NULL AUTO_INCREMENT,question varchar(10000),choice1 varchar(1000),choice2 varchar(1000),choice3 varchar(1000),answer varchar(1000),tie int(1),text int(1),points int(10), PRIMARY KEY (`qid`))");
+		$result1->execute();
+		$result1->close();
+		$result1=$dbconfig->prepare("CREATE TABLE admin_{$id}_{$cid}_res (userid int(10) NOT NULL,total int(10),normal int(10),tie int(10),dq int(1) NOT NULL DEFAULT '0', PRIMARY KEY (`userid`))");
+		$result1->execute();
+		$result1->close();
+		$result1=$dbconfig->prepare("CREATE TABLE admin_{$id}_{$cid}_response (userid int(10),qid int(10),response varchar(1000))");
+		$result1->execute();
+		$result1->close();
 		alert("Contest Created Successfully.");
 		
 	}

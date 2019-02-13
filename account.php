@@ -80,7 +80,7 @@ else
 					$npassword=mysqli_real_escape_string($dbconfig,$_POST['npassword']);
 					$npassword=crypt($npassword, '$2a$07$CCSCodersUnderSiegelul$');
 					$query=$dbconfig->prepare("UPDATE {$i}_login SET password=? where email=?");
-					$query->bind_param("ss",$password,$_SESSION['email']);
+					$query->bind_param("ss",$npassword,$_SESSION['email']);
 					$query->execute();
 					alert("Password Updated Successfully.");
 				}
