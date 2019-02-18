@@ -26,18 +26,26 @@ if($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']=="update")
 		$etime=strtotime($_POST['edate']);
 		$etime=date("Y:m:d H:i:s",$etime);
 		$ic=mysqli_real_escape_string($dbconfig,$_POST['ic']);
-		$query=mysqli_query($dbconfig,"UPDATE all_contests set name='$cname',org_name='$oname',start_time='$stime',end_time='$etime',ic='$ic',des='$des' where contestid={$_SESSION['cid']}");
+		$query=$dbconfig->prepare("UPDATE all_contests set name=?,org_name=?,start_time=?,end_time=?,ic=?,des=? where contestid=?");
+	$query->bind_param("ssssssi",$cname,$oname,$stime,$etime,$ic,$des,$_SESSION['cid']);
+	$query->execute();
 		alert("Contest Successfully Updated");
 }
 if($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']!="update")
 {
 	$_SESSION['cid']=mysqli_real_escape_string($dbconfig,$_POST['submit']);
-	$query=mysqli_query($dbconfig,"SELECT userid from all_contests where contestid={$_SESSION['cid']}");
-	$row=mysqli_fetch_array($query,MYSQLI_ASSOC);
+	$query=$dbconfig->prepare("SELECT userid from all_contests where contestid=?");
+	$query->bind_param("i",$_SESSION['cid']);
+	$query->execute();
+	$query=$query->get_result();
+	$row=$query->fetch_assoc();
 	$_SESSION['id']=$row['userid'];
 }
-	$query=mysqli_query($dbconfig,"SELECT * from all_contests where contestid={$_SESSION['cid']}");
-	$row=mysqli_fetch_array($query,MYSQLI_ASSOC);
+	$query=$dbconfig->prepare("SELECT * from all_contests where contestid=?");
+	$query->bind_param("i",$_SESSION['cid']);
+	$query->execute();
+	$query=$query->get_result();
+	$row=$query->fetch_assoc();
 	$stime=strtotime($row['start_time']);
 	$stime=date("d M Y H:i",$stime);
 	$etime=strtotime($row['end_time']);

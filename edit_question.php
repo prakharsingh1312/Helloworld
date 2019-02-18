@@ -34,20 +34,30 @@ elseif($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']=="update")
 		$tie=0;
 	$points=mysqli_real_escape_string($dbconfig,$_POST['points']);
 	if($type==0)
-	$query=mysqli_query($dbconfig,"UPDATE `admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre` SET question='$question' , answer='$answer' , choice1='$op1' , choice2='$op2' , choice3='$op3' , points=$points , text = $type , tie=$tie WHERE qid={$_SESSION['eq']}");
-	
-	else
-		$query=mysqli_query($dbconfig,"UPDATE `admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre` SET question='$question' , answer='$answer' , points=$points , text = $type , tie=$tie WHERE qid={$_SESSION['eq']}");
-	
+	{
+	$query=$dbconfig->prepare("UPDATE `admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre` SET question=? , answer=? , choice1=? , choice2=? , choice3=? , points=? , text = ? , tie=? WHERE qid=?");
+	$query->bind_param("sssssiiii",$question,$answer,$op1,$op2,$op3,$points,$type,$tie,$_SESSION['eq']);
+	$query->execute();
 	alert("Question Updated Successfully.");
+	}
+	else
+	{
+	$query=$dbconfig->prepare("UPDATE `admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre` SET question=? , answer=? , points=? , text = ? , tie=? WHERE qid=?");
+	$query->bind_param("ssiiii",$question,$answer,$points,$type,$tie,$_SESSION['eq']);
+	$query->execute();
+	alert("Question Updated Successfully.");
+	}
 	
 }
 if($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']!="update")
 {
 	$_SESSION['eq']=$_POST['submit'];
 }
-$query=mysqli_query($dbconfig,"SELECT * FROM admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre where qid={$_SESSION['eq']}");
-$row=mysqli_fetch_array($query,MYSQLI_ASSOC);
+$query=$dbconfig->prepare("SELECT * FROM admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre where qid=?");
+$query->bind_param("i",$_SESSION['eq']);
+$query->execute();
+$query=$query->get_result();
+$row=$query->fetch_assoc();
 ?>
 <html>
 <head>
@@ -152,7 +162,7 @@ $row=mysqli_fetch_array($query,MYSQLI_ASSOC);
 	<div class="col-sm-1"></div><h1 class="display-4">Edit Question</h1></div>
 	<br>
 	<form class="form" action="edit_question.php" method="post">
-	<div class="row"><div class="col-sm-1"></div><div class="col-sm-3 font-weight-bolder"><label for="exampleInputEmail1">Question:</label></div><div class="col-sm-6"><textarea class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Question" name='question'  rows="3" required><?php echo $row['question'];?></textarea><small class="form-text text-muted">Input will be formatted in html 'pre' tag (please use escape sequences for symbols)</small></div></div>
+	<div class="row"><div class="col-sm-1"></div><div class="col-sm-3 font-weight-bolder"><label for="exampleInputEmail1">Question:</label></div><div class="col-sm-6"><textarea class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Question" name='question'  rows="3" required><?php echo $row['question'];?></textarea><small class="form-text text-muted">Input will be formatted in html (please use escape sequences for symbols)</small></div></div>
 		<br>
 <div class="row"><div class="col-sm-1"></div>
 			<div class="col-sm-3 font-weight-bolder"><label for="exampleInputEmail1">Type:</label></div><div class="col-sm-6"><div class="form-check">

@@ -17,8 +17,10 @@ function check_pass($i,$dbconfig,$password){
 if(!isset($_SESSION['email'])||$_SESSION['admin']!=1)
 header("location:admin.php");
 
-$query1=mysqli_query($dbconfig,"SELECT total,name,enrollment_number,email,mobile,dq from user_login,admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where user_login.userid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid and dq!=1 order by total DESC,tie DESC");
-$count1=mysqli_num_rows($query1);
+$query1=$dbconfig->prepare("SELECT total,name,enrollment_number,email,mobile,dq from user_login,admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where user_login.userid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid and dq!=1 order by total DESC,tie DESC");
+$query1->execute();
+$query1=$query1->get_result();
+$count1=$query1->num_rows;
 ?>
 <html>
 <head>
@@ -122,21 +124,38 @@ $count1=mysqli_num_rows($query1);
 <div class="row">
 	<div class="col-sm-1"></div><h1 class="display-4">Leaderboard</h1></div>
 	<br>
-	<div class="row">
-		<div class="col-sm-1"></div><div class="col-sm-1 font-weight-bolder">Rank</div><div class="col-sm-2 font-weight-bolder">Name</div><div class="col-sm-2 font-weight-bolder">Enrollment Number</div><div class="col-sm-2 font-weight-bolder">Email</div><div class="col-sm-2 font-weight-bolder">Mobile</div><div class="col-sm-1 font-weight-bolder">Points</div>
-	</div><br>
-	<?php 
+	<table class="table table-hover">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Enrollment Number</th>
+      <th scope="col">Email</th>
+		<th scope="col">Mobile Number</th>
+		<th scope="col">Points</th>
+		
+    </tr>
+  </thead>
+		<tbody>
+			<?php 
 	if($count1==0)
-		echo'<div class="row">
-		<div class="col-sm-1"></div><div class="col-sm-8">No participants.</div></div>';
+		echo'
+    <tr>
+      <th scope="row">No Participants</th>
+    </tr>';
 			else{
 				$i=1;
-				while($result=mysqli_fetch_array($query1))
+				while($result=$query1->fetch_assoc())
 				{
 					
-					echo '<div class="row">
-		<div class="col-sm-1"></div><div class="col-sm-1">'.$i.'</div><div class="col-sm-2">'.$result['name'].'</div><div class="col-sm-2">'.$result['enrollment_number'].'</div><div class="col-sm-2">'.$result['email'].'</div><div class="col-sm-2">'.$result['mobile'].'</div><div class="col-sm-1">'.$result['total'].'</div>
-	</div><br>';
+					echo '<tr>
+      <th scope="row">'.$i.'</th>
+      <td>'.$result['name'].'</td>
+      <td>'.$result['enrollment_number'].'</td>
+      <td>'.$result['email'].'</td>
+	  <td>'.$result['mobile'].'</td>
+	  <td>'.$result['total'].'</td>
+    </tr>';
 				$i++;
 			}
 			}

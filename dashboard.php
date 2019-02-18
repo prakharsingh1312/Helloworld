@@ -60,8 +60,10 @@ header("location:redirect.php");
 	<br><br><br>
 	<div class="row"><div class="col-sm-1"></div><h1 class="display-4">Active Contests</h1></div><br>
 	<?php 
-	$query=mysqli_query($dbconfig,"SELECT * from all_contests");
-	while ($result=mysqli_fetch_array($query,MYSQLI_ASSOC))
+	$query=$dbconfig->prepare("SELECT * from all_contests");
+			$query->execute();
+			$query=$query->get_result();
+	while ($result=$query->fetch_assoc())
 	{
 		
 	$stime=strtotime($result['start_time']);
