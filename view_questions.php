@@ -18,10 +18,14 @@ if(!isset($_SESSION['email'])||$_SESSION['admin']!=1)
 header("location:admin.php");
 if($_SERVER['REQUEST_METHOD']=="POST")
 {
-	$query1=mysqli_query($dbconfig,"DELETE FROM admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre WHERE qid={$_POST['submit']}");
+	$query1=$dbconfig->prepare("DELETE FROM admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre WHERE qid=?");
+	$query1->bind_param("i",$_POST['submit']);
+	$query1->execute();
 	alert("Question deleted successfully.");
 }
-$query=mysqli_query($dbconfig,"SELECT question,qid from admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre");
+$query=$dbconfig->prepare("SELECT question,qid from admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre");
+$query->execute();
+$query=$query->get_result();
 
 ?>
 <html>
@@ -128,7 +132,7 @@ $query=mysqli_query($dbconfig,"SELECT question,qid from admin_{$_SESSION['id']}_
 	<br>
 	
 <div class="row"><div class="col-sm-1"></div><div class="col-sm-8 font-weight-bolder">Question</div><div class="col-sm-3 font-weight-bolder">Action</div></div>
-		<?php 	$count=mysqli_num_rows($query);
+		<?php 	$count=$query->num_rows;
 			if($count==0)
 				echo'<div class="row"><div class="col-sm-1"></div><div class="col-sm-8">No Questions added yet.</div><div class="col-sm-3 font-weight-bolder"></div></div>';
 			else

@@ -21,8 +21,11 @@ if($_SERVER['REQUEST_METHOD']=="POST")
 	$_SESSION['sid']=mysqli_real_escape_string($dbconfig,$_POST['view']);
 	
 }
-$query1=mysqli_query($dbconfig,"SELECT admin_{$_SESSION['id']}_{$_SESSION['cid']}_response.qid,response,question,answer from admin_{$_SESSION['id']}_{$_SESSION['cid']}_response,admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre where userid={$_SESSION['sid']} and admin_{$_SESSION['id']}_{$_SESSION['cid']}_response.qid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre.qid");
-$count1=mysqli_num_rows($query1);
+$query1=$dbconfig->prepare("SELECT admin_{$_SESSION['id']}_{$_SESSION['cid']}_response.qid,response,question,answer from admin_{$_SESSION['id']}_{$_SESSION['cid']}_response,admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre where userid=? and admin_{$_SESSION['id']}_{$_SESSION['cid']}_response.qid=admin_{$_SESSION['id']}_{$_SESSION['cid']}_pre.qid");
+$query1->bind_param("i",$_SESSION['sid']);
+$query1->execute();
+$query1=$query1->get_result();
+$count1=$query1->num_rows;
 ?>
 <html>
 <head>
@@ -134,7 +137,7 @@ $count1=mysqli_num_rows($query1);
 		echo'<div class="row">
 		<div class="col-sm-1"></div><div class="col-sm-8">No answers submitted.</div></div>';
 			else{
-				while($result=mysqli_fetch_array($query1))
+				while($result=$query1->fetch_assoc())
 				{
 					echo '<div class="row">
 		<div class="col-sm-1"></div><div class="col-sm-8">'.$result['question'].'</div><div class="col-sm-1">'.$result['answer'].'</div><div class="col-sm-1">'.$result['response'].'</div>

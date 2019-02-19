@@ -9,11 +9,20 @@ if(isset($_SESSION['email']))
 header("location:redirect.php");
 $email=mysqli_real_escape_string($dbconfig,$_GET['email']);
 $hash=mysqli_real_escape_string($dbconfig,$_GET['hash']);
-$query=mysqli_query($dbconfig,"SELECT * from user_login WHERE email='$email' AND hash='$hash'");
-$count=mysqli_num_rows($query);
+$query=$dbconfig->prepare("SELECT * from user_login WHERE email=? AND hash=?");
+$query->bind_param("ss",$email,$hash);
+$query->execute();
+$query=$query->get_result();
+$count=$query->num_rows;
 if($count==1)
 {
-	$query=mysqli_query($dbconfig,"UPDATE user_login SET activated=1 WHERE hash='$hash' AND email='$email'");
+	$query=$dbconfig->prepare("UPDATE user_login SET activated=1 WHERE hash=? AND email=?");
+	$query->bind_param("ss",$hash,$email);
+	$query->execute();
 	$_SESSION['acti']=1;
-	header("location:index.php");
+	
 }
+else
+	alert("Invalid Token");
+header("location:index.php");
+	

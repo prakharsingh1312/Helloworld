@@ -21,15 +21,22 @@ if($_SERVER['REQUEST_METHOD']=="POST")
 	if($_POST['submit']=='add')
 	{
 		$email=mysqli_real_escape_string($dbconfig,$_POST['email']);
-		$query3=mysqli_query($dbconfig,"SELECT userid FROM admin_login WHERE email='$email'");
-		$result=mysqli_fetch_array($query3,MYSQLI_ASSOC);
+		$query3=$dbconfig->prepare("SELECT userid FROM admin_login WHERE email=?");
+		$query3->bind_param("s",$email);
+		$query3->execute();
+		$query3=$query3->get_result();
+		$result=$query3->fetch_assoc();
 		$id=$result['userid'];
-		$query2=mysqli_query($dbconfig,"INSERT INTO moderators (userid,contestid) VALUES ($id,{$_SESSION['cid']})");
+		$query2=$dbconfig->prepare("INSERT INTO moderators (userid,contestid) VALUES (?,?)");
+		$query2->bind_param("ii",$id,$_SESSION['cid']);
+		$query2->execute();
 		alert("Moderator added successfully");
 	}
 	else{
 		$id=mysqli_real_escape_string($dbconfig,$_POST['submit']);
-		$query1=mysqli_query($dbconfig,"DELETE FROM moderators WHERE userid=$id AND contestid={$_SESSION['cid']}");
+		$query1=$dbconfig->prepare("DELETE FROM moderators WHERE userid=? AND contestid=?");
+		$query1->bind_param("ii",$id,$_SESSION['cid']);
+		$query1->execute();
 		alert("Moderator deleted successfully.");
 	}
 }
@@ -155,14 +162,17 @@ if($_SERVER['REQUEST_METHOD']=="POST")
 	<br>
 <div class="row"><div class="col-sm-1"></div><div class="col-sm-3 font-weight-bolder">Name</div><div class="col-sm-5 font-weight-bolder">Email</div><div class="col-sm-3 font-weight-bolder">Actions</div></div>
 <?php
-	$query=mysqli_query($dbconfig,"SELECT moderators.userid,admin_login.email,admin_login.name FROM admin_login,moderators WHERE moderators.contestid={$_SESSION['cid']} AND moderators.userid=admin_login.userid");
+	$query=$dbconfig->prepare("SELECT moderators.userid,admin_login.email,admin_login.name FROM admin_login,moderators WHERE moderators.contestid=? AND moderators.userid=admin_login.userid");
+			$query->bind_param("i",$_SESSION['cid']);
+			$query->execute();
+			$query=$query->get_result();
 			while ($row = $query->fetch_assoc()){
 
     $result1[] = $row;
 			
 
 }
-			$count=mysqli_num_rows($query);
+			$count=$query->num_rows;
 			if($count==0)
 			{
 				echo'<br><div class="row"><div class="col-sm-1"></div><div class="col-sm-3">No Moderators Added.</div><div class="col-sm-5 font-weight-bolder"></div><div class="col-sm-3 font-weight-bolder"></div></div>';

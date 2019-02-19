@@ -81,7 +81,9 @@ $_SESSION['choices']=$choices;
 $_SESSION['numq']=$num_questions_returned;
 $_SESSION['qid']=$qid;
 $_SESSION['points']=$points;
-$query=mysqli_query($dbconfig,"INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_res (userid) values ({$_SESSION['uid']})");
+$query=$dbconfig->prepare("INSERT INTO admin_{$_SESSION['id']}_{$_SESSION['cid']}_res (userid) values (?)");
+$query->bind_param("i",$_SESSION['uid']);
+$query->execute();
 header('location:play.php');
 
   ?>

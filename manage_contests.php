@@ -20,9 +20,14 @@ elseif($_SERVER['REQUEST_METHOD']=="POST")
 {
 	$id=$_SESSION['uid'];
 	$cid=mysqli_real_escape_string($dbconfig,$_POST['submit']);
-	$result=mysqli_query($dbconfig,"DROP TABLE admin_{$id}_{$cid}_pre,admin_{$id}_{$cid}_res,admin_{$id}_{$cid}_response");
-	$result=mysqli_query($dbconfig,"DELETE FROM all_contests where contestid=$cid");
-	$result=mysqli_query($dbconfig,"DELETE FROM moderators where contestid=$cid");
+	$result=$dbconfig->prepare("DROP TABLE admin_{$id}_{$cid}_pre,admin_{$id}_{$cid}_res,admin_{$id}_{$cid}_response");
+	$result->execute();
+	$result=$dbconfig->prepare("DELETE FROM all_contests where contestid=?");
+	$result->bind_param("i",$cid);
+	$result->execute();
+	$result=$dbconfig->prepare("DELETE FROM moderators where contestid=?");
+	$result->bind_param("i",$cid);
+	$result->execute();
 	alert("Contest Deleted Successfully");
 }
 ?>
@@ -107,14 +112,16 @@ elseif($_SERVER['REQUEST_METHOD']=="POST")
 	<div class="row"><div class="col-sm-1"></div><h1 class="display-4">Manage Contests</h1></div><br><div class="row"><div class="col-sm-1"></div><h3><small class="text-muted">Administrated Contests</small></h3></div><br>
 	<div class="row"><div class="col-sm-1"></div><div class="col-sm-6 font-weight-bolder">Contest Name</div><div class="col-sm-5 font-weight-bolder">Action</div></div>
 	<?php
-	$result="SELECT name,contestid from all_contests where userid={$_SESSION['uid']}";
-	$query=mysqli_query($dbconfig,$result);
-			while ($row1 = $query->fetch_assoc()){
+	$result=$dbconfig->prepare("SELECT name,contestid from all_contests where userid=?");
+	$result->bind_param("i",$_SESSION['uid']);
+	$result->execute();
+			$result=$result->get_result();
+			while ($row1 = $result->fetch_assoc()){
 
     $row[] = $row1;
 
 }
-			$count=mysqli_num_rows($query);
+			$count=$result->num_rows;
 			if($count==0)
 				echo '<br>
 <div class="row"><div class="col-sm-1"></div><div class="col-sm-6">No contests created.</div></div>';
@@ -130,8 +137,11 @@ elseif($_SERVER['REQUEST_METHOD']=="POST")
 	<br><div class="row"><div class="col-sm-1"></div><h3><small class="text-muted">Moderated Contests</small></h3></div><br>
 	<div class="row"><div class="col-sm-1"></div><div class="col-sm-6 font-weight-bolder">Contest Name</div><div class="col-sm-5 font-weight-bolder">Action</div></div>
 	<?php
-	$result="SELECT name,all_contests.contestid from all_contests,moderators where moderators.userid={$_SESSION['uid']} and moderators.contestid=all_contests.contestid";
-	$query=mysqli_query($dbconfig,$result);
+	$result="SELECT name,all_contests.contestid from all_contests,moderators where moderators.userid=? and moderators.contestid=all_contests.contestid";
+	$query=$dbconfig->prepare($result);
+	$query->bind_param("i",$_SESSION['uid']);
+	$query->execute();
+	$query=$query->get_result();
 			while ($row1 = $query->fetch_assoc()){
 
     $row[] = $row1;

@@ -14,14 +14,24 @@ header("location:index.php");
 if($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']!='ic')
 {
 		$_SESSION['cid']=$_POST['submit'];
-		$query=mysqli_query($dbconfig,"SELECT * from all_contests where contestid={$_SESSION['cid']}");
-		$result=mysqli_fetch_array($query,MYSQLI_ASSOC);
+		$query=$dbconfig->prepare("SELECT * from all_contests where contestid=?");
+	$query->bind_param("i",$_SESSION['cid']);
+	$query->execute();
+	$query=$query->get_result();
+		$result=$query->fetch_assoc();
 		$_SESSION['id']=$result['userid'];
 }
-$query=mysqli_query($dbconfig,"SELECT * from all_contests where contestid={$_SESSION['cid']}");
-		$result=mysqli_fetch_array($query,MYSQLI_ASSOC);
-$query1=mysqli_query($dbconfig,"SELECT * from admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where userid={$_SESSION['uid']}");
-		$count1=mysqli_num_rows($query1);
+$query=$dbconfig->prepare("SELECT * from all_contests where contestid=?");
+		$query->bind_param("i",$_SESSION['cid']);
+	$query->execute();
+	$query=$query->get_result();
+		$result=$query->fetch_assoc();
+$query1=$dbconfig->prepare("SELECT * from admin_{$_SESSION['id']}_{$_SESSION['cid']}_res where userid=?");
+$query1->bind_param("i",$_SESSION['uid']);
+	$query1->execute();
+	$query1=$query1->get_result();
+		
+		$count1=$query1->num_rows;
 if($_SERVER['REQUEST_METHOD']=="POST" && $_POST['submit']=='ic')
 {
 	if($result['ic']==$_POST['sec'])

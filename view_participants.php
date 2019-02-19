@@ -6,7 +6,7 @@ function alert($msg) {
 }
 function check_pass($i,$dbconfig,$password){
 	$password=crypt($password, '$2a$07$CCSCodersUnderSiegelul$');
-	$query1=mysqli_query($dbconfig,"SELECT * from {$i}_login where email='{$_SESSION['email']}' and password='$password'");
+	$query1=$dbconfig->prepare("SELECT * from {$i}_login where email='{$_SESSION['email']}' and password='$password'");
 	$count=mysqli_num_rows($query1);
 	return $count;
 }
@@ -16,12 +16,16 @@ if(!isset($_SESSION['email'])||$_SESSION['admin']!=1)
 header("location:admin.php");
 elseif($_SERVER['REQUEST_METHOD']=="POST" && isset($_POST['disqual'])){
 	$id=mysqli_real_escape_string($dbconfig,$_POST['disqual']);
-	$query3=mysqli_query($dbconfig,"UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET dq=1 where userid=$id");
+	$query3=$dbconfig->prepare("UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET dq=1 where userid=?");
+	$query3->bind_param("i",$_SESSION['uid']);
+	$query3->execute();
 	alert("Participant Disqualified.");
 }
 elseif($_SERVER['REQUEST_METHOD']=="POST" && isset($_POST['qual'])){
 	$id=mysqli_real_escape_string($dbconfig,$_POST['qual']);
-	$query3=mysqli_query($dbconfig,"UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET dq=0 where userid=$id");
+	$query3=$dbconfig->prepare("UPDATE admin_{$_SESSION['id']}_{$_SESSION['cid']}_res SET dq=0 where userid=?");
+	$query3->bind_param("i",$_SESSION['uid']);
+	$query3->execute();
 	alert("Action Undone.");
 }
 ?><html>
@@ -128,12 +132,14 @@ elseif($_SERVER['REQUEST_METHOD']=="POST" && isset($_POST['qual'])){
 	<br>
 <div class="row"><div class="col-sm-1"></div><div class="col-sm-2 font-weight-bolder">Name</div><div class="col-sm-2 font-weight-bolder">E-Mail</div><div class="col-sm-2 font-weight-bolder">Enrollment Number</div><div class="col-sm-2 font-weight-bolder">Mobile Number</div><div class="col-sm-2 font-weight-bolder">Actions</div></div>
 <?php
-	$query2=mysqli_query($dbconfig,"select admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid,name,email,enrollment_number,mobile,dq from admin_{$_SESSION['id']}_{$_SESSION['cid']}_res,user_login where admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid=user_login.userid");
-	$count=mysqli_num_rows($query2);
+	$query2=$dbconfig->prepare("select admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid,name,email,enrollment_number,mobile,dq from admin_{$_SESSION['id']}_{$_SESSION['cid']}_res,user_login where admin_{$_SESSION['id']}_{$_SESSION['cid']}_res.userid=user_login.userid");
+			$query2->execute();
+			$query2=$query2->get_result();
+	$count=$query2->num_rows;
 			if($count==0)
 				echo '<div class="row"><div class="col-sm-1"></div><div class="col-sm-4 form-text text-muted">No Submissions Yet.</div></div>';
 			else{
-	while($result=mysqli_fetch_array($query2,MYSQLI_ASSOC)){
+	while($result=$query2->fetch_assoc()){
 	echo '<div class="row"><div class="col-sm-1"></div><div class="col-sm-2">'.$result['name'];
 		if($result['dq']==1)
 		{

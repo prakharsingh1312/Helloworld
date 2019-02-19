@@ -17,7 +17,10 @@ $query=$query->get_result();
 $count=$query->num_rows;
 if($count==1)
 {
-	$query=mysqli_query($dbconfig,"UPDATE admin_login SET activated=1 WHERE hash='$hash' AND email='$email'");
+	$query=$dbconfig->prepare("UPDATE admin_login SET activated=1 WHERE hash=? AND email=?");
+	$query->bind_param("ss",$hash,$email);
+$query->execute();
+$query=$query->get_result();
 	$_SESSION['acti']=1;
 	header("location:admin.php");
 }

@@ -11,8 +11,12 @@ if(!isset($_SESSION['email'])||$_SESSION['user']!=1)
 
 header("location:index.php");
 }
-$query=mysqli_query($dbconfig,"SELECT * from all_contests where contestid={$_SESSION['cid']}");
-		$result=mysqli_fetch_array($query,MYSQLI_ASSOC);
+$query=$dbconfig->prepare("SELECT * from all_contests where contestid=?");
+$query->bind_param("i",$_SESSION['cid']);
+$query->execute();
+$query=$query->get_result();
+
+		$result=$query->fetch_assoc();
 ?>
 <html>
 <head>
