@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start;
 include("Assets/php/dbconfig.php");
 function alert($msg) {
     echo "<script type='text/javascript'>alert('$msg');</script>";

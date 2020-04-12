@@ -1,5 +1,5 @@
 <?php	
-session_start();
+session_start;
 require_once('Assets/php/dbconfig.php'); 
 
 //Choose Table accordingly
